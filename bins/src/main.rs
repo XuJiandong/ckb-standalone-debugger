@@ -188,13 +188,14 @@ fn main() {
     let script_group = verifier
         .find_script_group(script_group_type, &script_hash)
         .expect("find script group");
-    let mut program = verifier
-        .extract_script(&script_group.script)
-        .expect("extract script");
-    if let Some(replace_file) = matches.value_of("replace-binary") {
+    let program= if let Some(replace_file) = matches.value_of("replace-binary") {
         let data = read(replace_file).expect("read binary file");
-        program = data.into();
-    }
+        data.into()
+    } else {
+        verifier
+            .extract_script(&script_group.script)
+            .expect("extract script")
+    };
 
     if let Some(listen_address) = matches.value_of("listen") {
         // GDB path
