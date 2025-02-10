@@ -32,30 +32,17 @@ impl FileOperation {
         Self {}
     }
     fn fetch_string<Mac: SupportMachine>(machine: &mut Mac, addr: u64) -> Result<String, Error> {
-        let mut res = Vec::<u8>::new();
-        let mut done = false;
-        let mut count = 0;
-        let mut addr = addr;
-        while !done {
-            let reg = Mac::REG::from_u64(addr);
-            let eight_bytes = machine.memory_mut().load64(&reg)?;
-            let buf = eight_bytes.to_u64().to_le_bytes();
-            for c in buf {
-                if c != 0 {
-                    res.push(c);
-                } else {
-                    res.push(c);
-                    done = true;
-                    break;
-                }
+        let mut buffer = Vec::new();
+        let mut addr = addr.clone();
+        loop {
+            let byte = machine.memory_mut().load8(&Mac::REG::from_u64(addr))?;
+            if byte.to_u8() == 0 {
+                break;
             }
-            count += 1;
-            if count > 1024 {
-                panic!("Too long string");
-            }
-            addr += 8;
+            buffer.push(byte.to_u8());
+            addr += 1;
         }
-        Ok(String::from_utf8(res).expect("A valid UTF-8 string"))
+        Ok(String::from_utf8(buffer).expect("A valid UTF-8 string"))
     }
 }
 
