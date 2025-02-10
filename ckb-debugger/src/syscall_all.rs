@@ -37,6 +37,7 @@ impl FileOperation {
         loop {
             let byte = machine.memory_mut().load8(&Mac::REG::from_u64(addr))?;
             if byte.to_u8() == 0 {
+                buffer.push(0);
                 break;
             }
             buffer.push(byte.to_u8());
